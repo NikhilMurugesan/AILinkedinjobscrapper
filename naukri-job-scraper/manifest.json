@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Naukri Job Scraper",
+  "version": "1.0.0",
+  "description": "Scrape Naukri search results, fetch full job details in throttled background tabs, and export CSV or JSON.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "downloads",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://www.naukri.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Naukri Job Scraper",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.naukri.com/*"
+      ],
+      "js": [
+        "content_results.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,240 @@
+#linkedin-job-scraper-overlay {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2147483647;
+  width: 320px;
+  color: #17212b;
+  background: #ffffff;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  box-shadow: 0 18px 46px rgba(15, 23, 42, 0.22);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+#linkedin-job-scraper-overlay * {
+  box-sizing: border-box;
+}
+
+.lijs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #0a66c2;
+  color: #ffffff;
+}
+
+.lijs-header strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.lijs-body {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.lijs-minimized .lijs-body {
+  display: none;
+}
+
+.lijs-icon-button,
+#linkedin-job-scraper-overlay button,
+.lijs-popup button {
+  appearance: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.lijs-icon-button {
+  width: 28px;
+  height: 28px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.16);
+  font-weight: 700;
+}
+
+.lijs-status {
+  min-height: 20px;
+  color: #28313d;
+  font-size: 13px;
+}
+
+.lijs-progress-track {
+  width: 100%;
+  height: 8px;
+  background: #e9eef4;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.lijs-progress-bar {
+  width: 0%;
+  height: 100%;
+  background: #0a66c2;
+  border-radius: 999px;
+  transition: width 180ms ease;
+}
+
+.lijs-count {
+  color: #4b5563;
+  font-size: 12px;
+}
+
+.lijs-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.lijs-actions-secondary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#linkedin-job-scraper-overlay .lijs-actions button {
+  min-height: 32px;
+  padding: 6px 8px;
+  color: #ffffff;
+  background: #0a66c2;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#linkedin-job-scraper-overlay .lijs-actions-secondary button {
+  color: #17212b;
+  background: #edf3f8;
+}
+
+#linkedin-job-scraper-overlay[data-status="paused"] .lijs-progress-bar {
+  background: #b7791f;
+}
+
+#linkedin-job-scraper-overlay[data-status="complete"] .lijs-progress-bar {
+  background: #178a4b;
+}
+
+#linkedin-job-scraper-overlay[data-status="error"] .lijs-progress-bar,
+#linkedin-job-scraper-overlay[data-status="blocked"] .lijs-progress-bar {
+  background: #c2410c;
+}
+
+.lijs-popup {
+  width: 360px;
+  min-height: 420px;
+  margin: 0;
+  color: #1f2933;
+  background: #f6f8fa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.lijs-popup-shell {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.lijs-popup-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lijs-popup h1 {
+  margin: 0 0 4px;
+  color: #111827;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.lijs-popup p {
+  margin: 0;
+  color: #52616f;
+  font-size: 12px;
+}
+
+.lijs-popup-count {
+  min-width: 72px;
+  padding: 8px 10px;
+  color: #0a66c2;
+  background: #ffffff;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.lijs-popup-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.lijs-popup-actions-secondary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lijs-popup button {
+  min-height: 36px;
+  padding: 7px 8px;
+  color: #ffffff;
+  background: #0a66c2;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lijs-popup button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.lijs-popup-actions-secondary button {
+  color: #17212b;
+  background: #ffffff;
+  border: 1px solid #d8dee4;
+}
+
+.lijs-popup-section-title {
+  margin-bottom: 8px;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.lijs-popup-preview {
+  display: grid;
+  max-height: 190px;
+  overflow: auto;
+  gap: 8px;
+}
+
+.lijs-popup-job,
+.lijs-popup-empty {
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+}
+
+.lijs-popup-job strong {
+  display: block;
+  color: #111827;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.lijs-popup-job span,
+.lijs-popup-empty {
+  color: #52616f;
+  font-size: 12px;
+}

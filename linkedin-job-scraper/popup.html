@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LinkedIn Job Scraper</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="lijs-popup">
+    <main class="lijs-popup-shell">
+      <header class="lijs-popup-header">
+        <div>
+          <h1>LinkedIn Job Scraper</h1>
+          <p data-popup-status>Idle</p>
+        </div>
+        <div class="lijs-popup-count" data-popup-count>0</div>
+      </header>
+
+      <section class="lijs-popup-actions" aria-label="Scraper controls">
+        <button type="button" data-popup-action="start">Start</button>
+        <button type="button" data-popup-action="pause">Pause</button>
+        <button type="button" data-popup-action="resume">Resume</button>
+        <button type="button" data-popup-action="stop">Stop</button>
+      </section>
+
+      <section class="lijs-popup-actions lijs-popup-actions-secondary" aria-label="Data controls">
+        <button type="button" data-popup-action="csv">Download CSV</button>
+        <button type="button" data-popup-action="json">Download JSON</button>
+        <button type="button" data-popup-action="clear-cache">Clear Cache</button>
+      </section>
+
+      <section>
+        <div class="lijs-popup-section-title">Last scraped jobs</div>
+        <div class="lijs-popup-preview" data-popup-preview>
+          <div class="lijs-popup-empty">No jobs scraped yet.</div>
+        </div>
+      </section>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

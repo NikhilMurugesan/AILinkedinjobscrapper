@@ -1,0 +1,294 @@
+#naukri-job-scraper-overlay {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2147483647;
+  width: 334px;
+  color: #182230;
+  background: #ffffff;
+  border: 1px solid #d7dee8;
+  border-radius: 8px;
+  box-shadow: 0 18px 44px rgba(21, 34, 50, 0.22);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+#naukri-job-scraper-overlay * {
+  box-sizing: border-box;
+}
+
+.njs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  color: #ffffff;
+  background: #2457d6;
+}
+
+.njs-header strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.njs-body {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.njs-minimized .njs-body {
+  display: none;
+}
+
+.njs-icon-button,
+#naukri-job-scraper-overlay button,
+.njs-popup button {
+  appearance: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.njs-icon-button {
+  width: 28px;
+  height: 28px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
+  font-weight: 700;
+}
+
+.njs-status {
+  min-height: 20px;
+  color: #263444;
+  font-size: 13px;
+}
+
+.njs-progress-track {
+  width: 100%;
+  height: 8px;
+  background: #e7edf5;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.njs-progress-bar {
+  width: 0%;
+  height: 100%;
+  background: #2457d6;
+  border-radius: 999px;
+  transition: width 180ms ease;
+}
+
+.njs-count,
+.njs-current,
+.njs-tabs {
+  color: #4d5d70;
+  font-size: 12px;
+}
+
+.njs-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.njs-actions-secondary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#naukri-job-scraper-overlay .njs-actions button {
+  min-height: 32px;
+  padding: 6px 8px;
+  color: #ffffff;
+  background: #2457d6;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#naukri-job-scraper-overlay .njs-actions-secondary button {
+  color: #182230;
+  background: #eef3fb;
+}
+
+#naukri-job-scraper-overlay button:disabled,
+.njs-popup button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+#naukri-job-scraper-overlay[data-status="paused"] .njs-progress-bar {
+  background: #b7791f;
+}
+
+#naukri-job-scraper-overlay[data-status="complete"] .njs-progress-bar {
+  background: #168048;
+}
+
+#naukri-job-scraper-overlay[data-status="blocked"] .njs-progress-bar,
+#naukri-job-scraper-overlay[data-status="error"] .njs-progress-bar {
+  background: #c43e2f;
+}
+
+.njs-popup {
+  width: 372px;
+  min-height: 458px;
+  margin: 0;
+  color: #182230;
+  background: #f5f7fb;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.njs-popup-shell {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.njs-popup-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.njs-popup h1 {
+  margin: 0 0 4px;
+  color: #111827;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.njs-popup p {
+  margin: 0;
+  color: #59697c;
+  font-size: 12px;
+}
+
+.njs-popup-badge {
+  min-width: 76px;
+  padding: 7px 9px;
+  color: #2457d6;
+  background: #ffffff;
+  border: 1px solid #d7dee8;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.njs-popup-badge[data-status="running"] {
+  color: #ffffff;
+  background: #2457d6;
+}
+
+.njs-popup-badge[data-status="paused"] {
+  color: #7a4d00;
+  background: #fff4d8;
+}
+
+.njs-popup-badge[data-status="complete"] {
+  color: #0b6b3a;
+  background: #dff7e9;
+}
+
+.njs-popup-badge[data-status="blocked"],
+.njs-popup-badge[data-status="error"] {
+  color: #9b271d;
+  background: #ffe4df;
+}
+
+.njs-popup-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.njs-popup-stats div {
+  min-width: 0;
+  padding: 9px;
+  background: #ffffff;
+  border: 1px solid #d7dee8;
+  border-radius: 8px;
+}
+
+.njs-popup-stats span {
+  display: block;
+  margin-bottom: 4px;
+  color: #66768a;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.njs-popup-stats strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #182230;
+  font-size: 14px;
+}
+
+.njs-popup-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.njs-popup-actions-secondary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.njs-popup button {
+  min-height: 36px;
+  padding: 7px 8px;
+  color: #ffffff;
+  background: #2457d6;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.njs-popup-actions-secondary button {
+  color: #182230;
+  background: #ffffff;
+  border: 1px solid #d7dee8;
+}
+
+.njs-popup-section-title {
+  margin-bottom: 8px;
+  color: #344256;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.njs-popup-preview {
+  display: grid;
+  max-height: 184px;
+  overflow: auto;
+  gap: 8px;
+}
+
+.njs-popup-job,
+.njs-popup-empty {
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #d7dee8;
+  border-radius: 8px;
+}
+
+.njs-popup-job strong {
+  display: block;
+  color: #111827;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.njs-popup-job span,
+.njs-popup-empty {
+  color: #59697c;
+  font-size: 12px;
+}
