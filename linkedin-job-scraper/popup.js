@@ -2,15 +2,21 @@ const popupState = {
   jobs: [],
   state: {
     status: "idle",
-    message: "Idle",
+    message: "Ready",
     scrapedCount: 0,
-    totalEstimate: null
+    totalEstimate: null,
+    activeTabCount: 0,
+    activeTabLimit: 6,
+    currentPageNumber: null
   }
 };
 
 const elements = {
   status: document.querySelector("[data-popup-status]"),
   count: document.querySelector("[data-popup-count]"),
+  jobs: document.querySelector("[data-popup-jobs]"),
+  page: document.querySelector("[data-popup-page]"),
+  tabs: document.querySelector("[data-popup-tabs]"),
   preview: document.querySelector("[data-popup-preview]"),
   actions: document.querySelectorAll("[data-popup-action]")
 };
@@ -30,15 +36,17 @@ async function initPopup() {
   });
 }
 
-// Wires toolbar popup buttons to either the active tab or background exports.
 function bindActions() {
   for (const button of elements.actions) {
     button.addEventListener("click", async () => {
       const action = button.getAttribute("data-popup-action");
       button.disabled = true;
       try {
-        if (["start", "pause", "resume", "stop"].includes(action)) {
-          await sendCommandToActiveTab(action.toUpperCase());
+        if (action === "start") {
+          await sendCommandToActiveTab("START");
+        } else if (["pause", "resume", "stop"].includes(action)) {
+          await sendBackground({ type: "SCRAPER_CONTROL", command: action.toUpperCase() });
+          await sendCommandToActiveTab(action.toUpperCase(), true);
         } else if (action === "csv") {
           await sendBackground({ type: "EXPORT_CSV" });
         } else if (action === "json") {
@@ -56,7 +64,6 @@ function bindActions() {
   }
 }
 
-// Reads persisted state and jobs from the background service worker.
 async function refreshData() {
   const response = await sendBackground({ type: "GET_SCRAPER_DATA" });
   popupState.jobs = response.jobs || [];
@@ -64,7 +71,6 @@ async function refreshData() {
   render();
 }
 
-// Renders status, count, and the last five scraped jobs.
 function render() {
   const state = popupState.state || {};
   const count = popupState.jobs.length || state.scrapedCount || 0;
@@ -72,6 +78,15 @@ function render() {
 
   elements.status.textContent = `${capitalize(state.status || "idle")} - ${state.message || "Ready"}`;
   elements.count.textContent = `${count}${total}`;
+  if (elements.jobs) {
+    elements.jobs.textContent = String(count);
+  }
+  if (elements.page) {
+    elements.page.textContent = state.currentPageNumber ? `Page ${state.currentPageNumber}` : "-";
+  }
+  if (elements.tabs) {
+    elements.tabs.textContent = `${state.activeTabCount || 0}/${state.activeTabLimit || 6}`;
+  }
 
   const recent = popupState.jobs.slice(-5).reverse();
   if (!recent.length) {
@@ -91,10 +106,12 @@ function render() {
     .join("");
 }
 
-// Sends scrape commands to the active LinkedIn Jobs tab, injecting scripts if needed.
-async function sendCommandToActiveTab(command) {
+async function sendCommandToActiveTab(command, optional = false) {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id || !isLinkedInJobsUrl(tab.url || "")) {
+    if (optional) {
+      return { ok: true };
+    }
     throw new Error("Open a LinkedIn Jobs search or collection page first.");
   }
 

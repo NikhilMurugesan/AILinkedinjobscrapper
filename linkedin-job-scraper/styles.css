@@ -183,6 +183,34 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.lijs-popup-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.lijs-popup-stats > div {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  background: #ffffff;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.lijs-popup-stats span {
+  color: #6b7280;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.lijs-popup-stats strong {
+  color: #0a66c2;
+  font-size: 15px;
+  font-weight: 700;
+}
+
 .lijs-popup button {
   min-height: 36px;
   padding: 7px 8px;

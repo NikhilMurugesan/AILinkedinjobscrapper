@@ -64,16 +64,20 @@ The scraper tries selectors in order, so keep the most current selectors first a
 The detail tab concurrency limit is controlled by the named constant at the top of `background.js`:
 
 ```js
-const MAX_TABS = 2;
+const MAX_TABS = 6;
 ```
 
-Increase it only if Naukri and your browser remain stable. The scraper also waits a randomized 2-4 seconds between opening job detail tabs.
+Increase it only if Naukri and your browser remain stable. The scraper also waits a randomized 0.7-1.5 seconds between opening job detail tabs.
 
-Detail tabs are opened with `active: false` in the same Chrome window as the Naukri results tab. Blocker tabs are not focused by default, so you can keep using other tabs or another Chrome window while scraping runs.
+Detail tabs are opened with `active: false` in the same Chrome window as the Naukri results tab. If Chrome or Naukri activates a managed detail tab anyway, the extension switches back to your previous tab so you can keep using other tabs or another Chrome window while scraping runs.
+
+## Idempotent Start
+
+**Start preserves previously scraped jobs.** When you click Start, the existing `jobsById` store is kept and used to filter out cards whose Naukri job ID / URL has already been collected. This means you can stop, navigate, or reload and restart without re-fetching JDs that you already have. Use **Clear Cache** to wipe everything and start over.
 
 ## Known Limitations
 
-- Naukri can show CAPTCHA, security, login, or expired-job pages. CAPTCHA pauses scraping without stealing focus; open the blocked tab manually if needed, then click Resume. Expired and login-required jobs are recorded without crashing.
+- Naukri can show CAPTCHA, security, login, or expired-job pages. CAPTCHA on the results page pauses scraping; CAPTCHA inside a job detail tab is recorded for that job and skipped so the rest of the queue continues. Expired and login-required jobs are recorded without crashing.
 - Some apply buttons do not expose the final employer URL until a real click or login flow. The extension captures the best visible `href` or data URL but does not submit applications.
 - Very large exports are generated through `chrome.downloads` using a data URL. If Chrome rejects a huge export, try exporting after smaller batches.
 - DOM changes may require selector updates in `content_results.js` or `content_job.js`.

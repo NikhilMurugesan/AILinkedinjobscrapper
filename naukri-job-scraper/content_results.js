@@ -514,7 +514,8 @@
       if (!isVisible(element) || isDisabled(element)) {
         continue;
       }
-      const href = element.matches("a[href]") ? toAbsoluteUrl(element.getAttribute("href")) : "";
+      const anchor = element.matches("a[href]") ? element : element.closest?.("a[href]");
+      const href = anchor ? toAbsoluteUrl(anchor.getAttribute("href")) : "";
       return { element, href };
     }
 
@@ -578,7 +579,7 @@
         </div>
         <div class="njs-count" data-njs-count>Scraped 0 jobs</div>
         <div class="njs-current" data-njs-current>Current job: -</div>
-        <div class="njs-tabs" data-njs-tabs>Open tabs: 0/2</div>
+        <div class="njs-tabs" data-njs-tabs>Open tabs: 0/6</div>
         <div class="njs-actions">
           <button type="button" data-njs-action="start">Start</button>
           <button type="button" data-njs-action="pause">Pause</button>
@@ -638,7 +639,7 @@
     overlay.querySelector("[data-njs-progress]").style.width = `${progress}%`;
     overlay.querySelector("[data-njs-count]").textContent = `Scraped ${scraped}${total ? ` / ~${total}` : ""} jobs`;
     overlay.querySelector("[data-njs-current]").textContent = `Current job: ${current}`;
-    overlay.querySelector("[data-njs-tabs]").textContent = `Open tabs: ${state?.activeTabCount || 0}/${state?.activeTabLimit || 2}`;
+    overlay.querySelector("[data-njs-tabs]").textContent = `Open tabs: ${state?.activeTabCount || 0}/${state?.activeTabLimit || 6}`;
   }
 
   function detectCaptcha() {

@@ -1,7 +1,7 @@
-const MAX_TABS = 2;
-const TAB_TIMEOUT_MS = 15000;
-const TAB_OPEN_DELAY_MIN_MS = 2000;
-const TAB_OPEN_DELAY_MAX_MS = 4000;
+const MAX_TABS = 6;
+const TAB_TIMEOUT_MS = 20000;
+const TAB_OPEN_DELAY_MIN_MS = 700;
+const TAB_OPEN_DELAY_MAX_MS = 1500;
 
 const STORAGE_KEYS = {
   jobsById: "naukriJobScraper.jobsById",
@@ -66,6 +66,7 @@ const runtime = {
   activeTabs: new Map(),
   batches: {},
   seenKeys: new Set(),
+  lastActiveTabsByWindow: new Map(),
   initPromise: null,
   pumpRunning: false,
   pumpTimerId: null,
@@ -109,6 +110,18 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
       jobDescription: "Could not inject job detail extractor.",
       error: error.message || String(error)
     });
+  });
+});
+
+chrome.tabs.onActivated.addListener((activeInfo) => {
+  keepManagedTabsInBackground(activeInfo.tabId, activeInfo.windowId).catch((error) => {
+    console.error("Failed to restore active tab:", error);
+  });
+});
+
+chrome.tabs.onCreated.addListener((tab) => {
+  closeChildTabFromManagedDetail(tab).catch((error) => {
+    console.error("Failed to close scraper child tab:", error);
   });
 });
 
@@ -188,6 +201,7 @@ async function initializeRuntime() {
   runtime.activeTabs = new Map();
   runtime.batches = data[STORAGE_KEYS.batches] || {};
   runtime.seenKeys = new Set(data[STORAGE_KEYS.seenKeys] || []);
+  runtime.lastActiveTabsByWindow = new Map();
   runtime.nextOpenAt = 0;
 
   if (shouldRecoverActiveTasks(state.status)) {
@@ -244,15 +258,19 @@ async function getScraperData() {
   };
 }
 
-// Starts a new scrape and clears only the previous scrape's persisted data.
+// Starts a new scrape. Preserves previously scraped jobs so already-collected JDs
+// are not refetched (idempotent). Use CLEAR_SCRAPER_DATA to wipe the store.
 async function startNewScrape(page) {
   await closeActiveTabs(false);
 
   runtime.queue = [];
   runtime.activeTabs.clear();
   runtime.batches = {};
-  runtime.seenKeys = new Set();
   runtime.nextOpenAt = 0;
+
+  // Pre-seed seenKeys with already-stored job keys so duplicate cards are skipped.
+  const existing = (await storageGet([STORAGE_KEYS.jobsById]))[STORAGE_KEYS.jobsById] || {};
+  runtime.seenKeys = new Set(Object.keys(existing));
 
   const state = decorateState({
     ...DEFAULT_STATE,
@@ -268,11 +286,10 @@ async function startNewScrape(page) {
   });
 
   await storageSet({
-    [STORAGE_KEYS.jobsById]: {},
     [STORAGE_KEYS.queue]: [],
     [STORAGE_KEYS.activeTasks]: [],
     [STORAGE_KEYS.batches]: {},
-    [STORAGE_KEYS.seenKeys]: [],
+    [STORAGE_KEYS.seenKeys]: Array.from(runtime.seenKeys),
     [STORAGE_KEYS.state]: state
   });
   await broadcastState(state);
@@ -341,6 +358,8 @@ async function enqueueResultsPage(jobs, page, sender) {
       createdAt: Date.now()
     });
   }
+
+  rememberUserTab(sender?.tab);
 
   runtime.queue.push(...tasks);
   runtime.batches[batchId] = {
@@ -613,13 +632,6 @@ async function finishTask(tabId, detail, options = {}) {
   const task = runtime.activeTabs.get(tabId);
   clearTaskTimer(task);
 
-  if (detail?.captchaDetected) {
-    task.status = "captcha";
-    runtime.activeTabs.set(tabId, task);
-    await persistRuntime();
-    return pauseForCaptcha(tabId, "job detail");
-  }
-
   runtime.activeTabs.delete(tabId);
 
   const scrapeStatus = detail.scrapeStatus || (detail.expired ? "Expired" : "Complete");
@@ -639,8 +651,12 @@ async function finishTask(tabId, detail, options = {}) {
 
   markBatchFinished(task.batchId, scrapeStatus !== "Complete");
   await persistRuntime();
+  const resultMessage =
+    scrapeStatus === "Complete"
+      ? `Scraped ${job.jobTitle || "job"}`
+      : `${scrapeStatus}: recorded ${job.jobTitle || "job"} and continued`;
   await updateScraperState({
-    message: `Scraped ${job.jobTitle || "job"}`,
+    message: resultMessage,
     currentAction: runtime.queue.length ? "Moving to next queued job" : "Waiting for page batch to finish",
     currentJobTitle: job.jobTitle || "",
     activeTabCount: runtime.activeTabs.size,
@@ -686,6 +702,50 @@ async function createInactiveJobTab(task) {
     console.warn("Could not open job tab in source window; falling back to inactive current-window tab.", error);
     return tabsCreate({ url: task.url, active: false });
   }
+}
+
+async function keepManagedTabsInBackground(tabId, windowId) {
+  await ensureInitialized();
+  if (!Number.isInteger(windowId)) {
+    return;
+  }
+
+  if (!runtime.activeTabs.has(tabId)) {
+    runtime.lastActiveTabsByWindow.set(windowId, tabId);
+    return;
+  }
+
+  const previousTabId = runtime.lastActiveTabsByWindow.get(windowId);
+  if (previousTabId && previousTabId !== tabId && (await tabExists(previousTabId))) {
+    await tabsUpdate(previousTabId, { active: true });
+    return;
+  }
+
+  const fallback = (await tabsQuery({ windowId })).find((tab) => {
+    return tab.id && tab.id !== tabId && !runtime.activeTabs.has(tab.id);
+  });
+
+  if (fallback?.id) {
+    runtime.lastActiveTabsByWindow.set(windowId, fallback.id);
+    await tabsUpdate(fallback.id, { active: true });
+  }
+}
+
+async function closeChildTabFromManagedDetail(tab) {
+  await ensureInitialized();
+
+  if (!tab?.id || !tab.openerTabId || !runtime.activeTabs.has(tab.openerTabId)) {
+    return;
+  }
+
+  await closeTab(tab.id);
+}
+
+function rememberUserTab(tab) {
+  if (!tab?.id || !Number.isInteger(tab.windowId) || runtime.activeTabs.has(tab.id)) {
+    return;
+  }
+  runtime.lastActiveTabsByWindow.set(tab.windowId, tab.id);
 }
 
 function markBatchFinished(batchId, failed) {
@@ -1140,6 +1200,19 @@ function tabsRemove(tabId) {
         return;
       }
       resolve();
+    });
+  });
+}
+
+function tabsUpdate(tabId, updateProperties) {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.update(tabId, updateProperties, (tab) => {
+      const error = chrome.runtime.lastError;
+      if (error) {
+        reject(new Error(error.message));
+        return;
+      }
+      resolve(tab);
     });
   });
 }

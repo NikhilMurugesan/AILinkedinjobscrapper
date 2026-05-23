@@ -6,7 +6,7 @@ const popupState = {
     scrapedCount: 0,
     totalEstimate: null,
     activeTabCount: 0,
-    activeTabLimit: 2
+    activeTabLimit: 6
   }
 };
 
@@ -81,7 +81,7 @@ function render() {
   elements.message.textContent = state.message || "Ready";
   elements.count.textContent = `${jobsCount}${total}`;
   elements.page.textContent = page;
-  elements.tabs.textContent = `${state.activeTabCount || 0}/${state.activeTabLimit || 2}`;
+  elements.tabs.textContent = `${state.activeTabCount || 0}/${state.activeTabLimit || 6}`;
 
   const recent = popupState.jobs.slice(-5).reverse();
   if (!recent.length) {
